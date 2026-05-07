@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>סטודיו נגה — שיעורים</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { height: 100%; }
+    body { font-family: 'Heebo', sans-serif; color: #4D2115; min-height: 100%; position: relative; }
+
+    .demo-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 9999; background: #4D2115; color: #EEE7DD; text-align: center; padding: 0.38rem 1rem; font-size: 0.74rem; font-family: 'Heebo', sans-serif; letter-spacing: 0.5px; }
+
+    .bg { position: absolute; inset: 0; z-index: 0; background: linear-gradient(148deg, #2d3b20 0%, #1c1008 55%, #2a1508 100%); }
+
+    .page { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 4rem 1.2rem 4rem; }
+
+    .studio-header { text-align: center; color: white; margin-bottom: 1.5rem; }
+    .studio-header h1 { font-size: 2rem; font-weight: 700; letter-spacing: 3px; text-shadow: 0 2px 14px rgba(0,0,0,0.5); }
+    .week-label { font-size: 0.85rem; font-weight: 300; color: rgba(255,255,255,0.65); margin-top: 0.4rem; letter-spacing: 0.5px; }
+
+    .card { background: rgba(238,231,221,0.97); backdrop-filter: blur(10px); border-radius: 20px; padding: 2rem 1.8rem; width: 100%; max-width: 540px; box-shadow: 0 8px 40px rgba(0,0,0,0.28); }
+
+    .card-title { font-size: 1rem; font-weight: 700; color: #78855F; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #ede8e0; }
+
+    input[type=tel] { width: 100%; padding: 0.8rem 1rem; border: 2px solid #ede8e0; border-radius: 10px; font-size: 1rem; font-family: 'Heebo', sans-serif; background: white; transition: border-color 0.2s; margin-bottom: 0.75rem; }
+    input:focus { outline: none; border-color: #78855F; }
+
+    .btn { width: 100%; padding: 0.9rem; border: none; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; font-family: 'Heebo', sans-serif; transition: background 0.2s; }
+    .btn-main { background: #78855F; color: white; }
+    .btn-main:hover { background: #606A4C; }
+    .btn-register { background: #78855F; color: white; width: auto; padding: 0.5rem 1.2rem; font-size: 0.9rem; border-radius: 8px; border: none; cursor: pointer; font-family: 'Heebo', sans-serif; font-weight: 700; transition: background 0.2s; }
+    .btn-register:hover { background: #606A4C; }
+    .btn-registered { background: #e8f5ee; color: #78855F; border: 2px solid #78855F; width: auto; padding: 0.5rem 1.2rem; font-size: 0.9rem; border-radius: 8px; cursor: default; font-family: 'Heebo', sans-serif; font-weight: 700; }
+    .btn-cancel { background: white; color: #c53030; border: 2px solid #e57373; width: auto; padding: 0.5rem 1.2rem; font-size: 0.85rem; border-radius: 8px; cursor: pointer; font-family: 'Heebo', sans-serif; font-weight: 700; }
+    .btn-cancel:hover { background: #fff5f5; }
+
+    .subscription-badge { background: #fdf0e0; border: 1px solid #e8c97a; border-radius: 10px; padding: 0.75rem 1rem; margin-bottom: 1.2rem; font-size: 0.9rem; }
+    .subscription-badge strong { color: #78855F; }
+    .remaining { font-size: 1.3rem; font-weight: 700; color: #78855F; }
+
+    .class-card { background: white; border-radius: 12px; border: 1px solid #ede8e0; padding: 1rem 1.2rem; margin-bottom: 0.75rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+    .class-title { font-weight: 700; font-size: 1rem; color: #4D2115; }
+    .class-meta { font-size: 0.82rem; color: #7A6860; margin-top: 0.2rem; }
+    .class-spots { font-size: 0.78rem; color: #78855F; margin-top: 0.15rem; }
+    .class-full .class-spots { color: #c53030; }
+
+    .notice-box { background: #f0f4ff; border: 1px solid #c7d4f0; border-radius: 10px; padding: 0.65rem 1rem; margin-bottom: 1rem; font-size: 0.8rem; color: #4a5568; line-height: 1.6; }
+
+    .msg { padding: 0.7rem 1rem; border-radius: 8px; margin-bottom: 0.75rem; font-weight: 600; font-size: 0.88rem; }
+    .msg-error { background: #fed7d7; color: #c53030; }
+    .msg-success { background: #E0E8CC; color: #4D5A35; }
+
+    .hidden { display: none; }
+    .powered { display: flex; align-items: center; justify-content: center; gap: 0.35rem; color: rgba(255,255,255,0.35); font-size: 0.72rem; margin-top: 2rem; letter-spacing: 1px; }
+    .powered-logo { width: 16px; height: 16px; object-fit: contain; border-radius: 50%; opacity: 0.5; }
+  </style>
+</head>
+<body>
+
+<div class="demo-bar">🫒 גרסת הדגמה · olive platform — המערכת שמנהלת לך את העסק</div>
+
+<div class="bg"></div>
+
+<div class="page">
+  <div class="studio-header">
+    <h1>סטודיו נגה</h1>
+    <div class="week-label" id="week-label">שיעורים השבוע</div>
+  </div>
+
+  <div class="card">
+    <div id="msg-area"></div>
+
+    <div id="step-phone">
+      <div class="card-title">מה מספר הטלפון שלך?</div>
+      <input type="tel" id="phone-input" placeholder="05X-XXXXXXX" inputmode="numeric">
+      <p style="font-size:0.78rem;color:#78855F;margin-bottom:0.75rem">💡 הדגמה: הזינו 052-1111111</p>
+      <button class="btn btn-main" onclick="findClient()">כניסה לשיעורים</button>
+    </div>
+
+    <div id="step-classes" class="hidden">
+      <div id="sub-badge" class="subscription-badge"></div>
+      <div class="notice-box">
+        הרשמה פתוחה כל עוד יש מקום · ביטול הרשמה אפשרי עד 24 שעות לפני השיעור
+      </div>
+      <div class="card-title">שיעורים זמינים</div>
+      <div id="classes-list"></div>
+    </div>
+  </div>
+
+  <div class="powered"><img src="logo-olive.png" alt="" class="powered-logo"> powered by olive</div>
+</div>
+
+<script>
+  const DEMO_CLIENT = { full_name: 'מיכל כהן', sub: 'מנוי חודשי', remaining: 5, expiry: '28.5.2026' };
+
+  const now = new Date('2026-05-03');
+  const weekEnd = new Date('2026-05-17');
+  document.getElementById('week-label').textContent =
+    `שיעורים ${now.toLocaleDateString('he-IL')} — ${weekEnd.toLocaleDateString('he-IL')}`;
+
+  const _days = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+  function fmtDay(d) {
+    const dt = new Date(d);
+    return `יום ${_days[dt.getDay()]}, ${dt.toLocaleDateString('he-IL')}`;
+  }
+
+  const DEMO_CLASSES = [
+    { id: 3, title: 'יוגה בוקר', date: '2026-05-05', time: '09:00', capacity: 10, registered: 6 },
+    { id: 4, title: 'פילאטיס בסיסי', date: '2026-05-06', time: '18:00', capacity: 8, registered: 5 },
+    { id: 5, title: 'יוגה מתקדמים', date: '2026-05-07', time: '07:30', capacity: 8, registered: 3 },
+    { id: 6, title: 'מתיחות וגמישות', date: '2026-05-08', time: '08:00', capacity: 12, registered: 4 },
+    { id: 7, title: 'יוגה נינוחה', date: '2026-05-11', time: '19:00', capacity: 10, registered: 2 },
+    { id: 8, title: 'פילאטיס אמצע שבוע', date: '2026-05-13', time: '18:00', capacity: 8, registered: 0 },
+  ];
+
+  const myRegistrations = new Set();
+  let clientRemaining = DEMO_CLIENT.remaining;
+
+  function showMsg(text, type = 'error') {
+    document.getElementById('msg-area').innerHTML = `<div class="msg msg-${type}">${text}</div>`;
+    setTimeout(() => document.getElementById('msg-area').innerHTML = '', 4000);
+  }
+
+  function findClient() {
+    const phone = document.getElementById('phone-input').value.trim();
+    if (!phone) return showMsg('נא להכניס מספר טלפון');
+
+    document.getElementById('sub-badge').innerHTML = `
+      <div>שלום <strong>${DEMO_CLIENT.full_name}</strong> 👋</div>
+      <div style="margin-top:0.4rem">מנוי: <strong>${DEMO_CLIENT.sub}</strong></div>
+      <div style="margin-top:0.2rem">נותרו: <span class="remaining" id="remaining-count">${clientRemaining}</span> תרגולים · תוקף עד ${DEMO_CLIENT.expiry}</div>
+    `;
+    document.getElementById('step-phone').classList.add('hidden');
+    document.getElementById('step-classes').classList.remove('hidden');
+    renderClasses();
+  }
+
+  function renderClasses() {
+    document.getElementById('classes-list').innerHTML = DEMO_CLASSES.map(c => {
+      const spots = c.capacity - c.registered;
+      const isRegistered = myRegistrations.has(c.id);
+      const isFull = spots <= 0 && !isRegistered;
+      const spotsText = isFull ? 'השיעור מלא' : isRegistered ? `רשומ/ה ✓ · ${spots} מקומות פנויים` : `${spots} מקומות פנויים`;
+
+      return `<div class="class-card${isFull ? ' class-full' : ''}">
+        <div class="class-info">
+          <div class="class-title">${c.title}</div>
+          <div class="class-meta">${fmtDay(c.date)} · ${c.time}</div>
+          <div class="class-spots">${spotsText}</div>
+        </div>
+        ${isRegistered
+          ? `<button class="btn-cancel" onclick="cancelClass(${c.id}, this)">ביטול</button>`
+          : isFull
+            ? `<button class="btn-register" disabled style="background:#a0a090;cursor:not-allowed">מלא</button>`
+            : `<button class="btn-register" onclick="registerClass(${c.id}, this)">הירשמו</button>`
+        }
+      </div>`;
+    }).join('');
+  }
+
+  function registerClass(classId, btn) {
+    if (clientRemaining <= 0) return showMsg('אין תרגולים נותרים במנוי שלך');
+    btn.disabled = true;
+    btn.textContent = '...';
+    setTimeout(() => {
+      myRegistrations.add(classId);
+      showMsg('✓ נרשמת בהצלחה!', 'success');
+      renderClasses();
+      document.getElementById('remaining-count').textContent = clientRemaining;
+    }, 500);
+  }
+
+  function cancelClass(classId, btn) {
+    btn.disabled = true;
+    btn.textContent = '...';
+    setTimeout(() => {
+      myRegistrations.delete(classId);
+      showMsg('✓ ההרשמה בוטלה', 'success');
+      renderClasses();
+    }, 400);
+  }
+
+  document.getElementById('phone-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') findClient();
+  });
+</script>
+</body>
+</html>

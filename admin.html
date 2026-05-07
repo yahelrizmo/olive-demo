@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>olive — ניהול | סטודיו נגה</title>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #EEE7DD; color: #4D2115; display: flex; height: 100vh; overflow: hidden; }
+
+    .sidebar { width: 300px; flex-shrink: 0; position: relative; overflow: hidden; background: linear-gradient(165deg, #606A4C 0%, #3d4f30 40%, #2a1a0a 100%); }
+    .sidebar-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: space-between; padding: 2rem 1.5rem; color: white; }
+    .sidebar-logo { display: flex; align-items: center; gap: 0.75rem; }
+    .sidebar-logo img { width: 44px; height: 44px; object-fit: contain; border-radius: 50%; background: rgba(255,255,255,0.15); padding: 5px; flex-shrink: 0; }
+    .sidebar-logo h1 { font-size: 1.8rem; font-weight: 700; letter-spacing: 4px; text-shadow: 0 2px 8px rgba(0,0,0,0.4); text-transform: lowercase; font-family: 'Heebo', sans-serif; }
+    .sidebar-bottom { text-align: right; }
+    .sidebar-bottom .studio-name { font-size: 0.95rem; opacity: 0.85; font-family: 'Heebo', sans-serif; }
+    .sidebar-bottom .today-date { font-size: 0.82rem; opacity: 0.65; margin-top: 0.3rem; font-family: 'Heebo', sans-serif; }
+
+    .app-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+    nav { background: white; border-bottom: 2px solid #C2C9A8; display: flex; flex-shrink: 0; }
+    nav button { padding: 0.85rem 1.3rem; border: none; background: none; cursor: pointer; font-size: 0.88rem; color: #7A8570; border-bottom: 3px solid transparent; display: flex; align-items: center; gap: 0.4rem; font-family: 'Heebo', sans-serif; }
+    nav button.active { color: #4D2115; border-bottom-color: #78855F; font-weight: 600; }
+    nav button:hover { background: #E8EAE0; }
+    nav button svg { width: 16px; height: 16px; stroke-width: 1.8; }
+    .nav-badge { background: #e53e3e; color: white; font-size: 0.65rem; font-weight: 700; border-radius: 50%; min-width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; padding: 0 3px; }
+    .hc-badge { position: absolute; top: 8px; left: 8px; background: #e53e3e; color: white; font-size: 0.65rem; font-weight: 700; border-radius: 50%; min-width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; padding: 0 3px; }
+
+    main { padding: 1.5rem; overflow-y: auto; flex: 1; }
+
+    .section { display: none; }
+    .section.active { display: block; }
+
+    .card { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 4px rgba(0,0,0,0.08); border: 1px solid #C2C9A8; }
+    h2 { font-size: 1.15rem; margin-bottom: 1rem; color: #4D2115; font-family: 'Heebo', sans-serif; }
+
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1rem; }
+    label { display: block; font-size: 0.85rem; color: #7A8570; margin-bottom: 0.25rem; font-family: 'Heebo', sans-serif; }
+    input, select, textarea { width: 100%; padding: 0.6rem 0.8rem; border: 1px solid #C2C9A8; border-radius: 8px; font-size: 0.95rem; font-family: 'Heebo', sans-serif; }
+    input:focus, select:focus { outline: none; border-color: #78855F; }
+
+    .btn { padding: 0.6rem 1.2rem; border: none; border-radius: 8px; cursor: pointer; font-size: 0.95rem; font-weight: 600; font-family: 'Heebo', sans-serif; }
+    .btn-primary { background: #4D2115; color: white; }
+    .btn-primary:hover { background: #2E1208; }
+    .btn-danger { background: #e53e3e; color: white; }
+    .btn-sm { padding: 0.3rem 0.7rem; font-size: 0.8rem; }
+
+    table { width: 100%; border-collapse: collapse; }
+    th { background: #E8EAE0; padding: 0.75rem; text-align: right; font-size: 0.85rem; color: #78855F; border-bottom: 2px solid #C2C9A8; font-family: 'Heebo', sans-serif; }
+    td { padding: 0.75rem; border-bottom: 1px solid #D4D9BF; font-size: 0.9rem; font-family: 'Heebo', sans-serif; }
+    tr:hover td { background: #E8EAE0; }
+
+    .badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; font-family: 'Heebo', sans-serif; }
+    .badge-green { background: #E0E8CC; color: #4D5A35; }
+    .badge-orange { background: #feebc8; color: #c05621; }
+    .badge-red { background: #fed7d7; color: #c53030; }
+
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .stat { background: white; border-radius: 12px; padding: 1rem; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid #C2C9A8; }
+    .stat-number { font-size: 2rem; font-weight: 900; color: #78855F; font-family: 'Heebo', sans-serif; }
+    .stat-label { font-size: 0.8rem; color: #7A8570; margin-top: 0.25rem; font-family: 'Heebo', sans-serif; }
+
+    .msg { padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 1rem; font-weight: 600; font-family: 'Heebo', sans-serif; }
+    .msg-success { background: #E0E8CC; color: #4D5A35; }
+    .msg-error { background: #fed7d7; color: #c53030; }
+    .msg-info { background: #e8f0fe; color: #1a56db; }
+
+    .empty { text-align: center; color: #7A8570; padding: 2rem; font-family: 'Heebo', sans-serif; }
+
+    /* PIN */
+    #pin-screen { position: fixed; inset: 0; z-index: 9999; background: #EEE7DD; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5rem; }
+    #pin-screen.hidden { display: none; }
+    .pin-logo { text-align: center; }
+    .pin-logo img { display: block; margin: 0 auto 0.6rem; width: 80px; height: 80px; object-fit: contain; border-radius: 50%; background: #E8EAE0; padding: 8px; }
+    .pin-logo .pin-subtitle { color: #7A8570; font-size: 0.88rem; margin-top: 0.3rem; font-family: 'Heebo', sans-serif; }
+    .pin-logo .pin-hint { color: #78855F; font-size: 0.78rem; margin-top: 0.5rem; font-family: 'Heebo', sans-serif; background: #E8EAE0; border-radius: 8px; padding: 0.35rem 0.75rem; display: inline-block; }
+    .pin-dots { display: flex; gap: 0.75rem; justify-content: center; }
+    .pin-dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid #78855F; background: transparent; transition: background 0.15s; }
+    .pin-dot.filled { background: #78855F; }
+    .pin-keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem; width: 240px; }
+    .pin-key { padding: 1rem; border: none; border-radius: 12px; background: white; font-size: 1.4rem; font-weight: 700; color: #4D2115; box-shadow: 0 1px 3px rgba(0,0,0,0.12); cursor: pointer; transition: background 0.15s; font-family: 'Heebo', sans-serif; }
+    .pin-key:active { background: #C2C9A8; }
+    .pin-key.wide { grid-column: span 2; }
+    .pin-error { color: #c53030; font-size: 0.85rem; min-height: 1.2em; text-align: center; font-family: 'Heebo', sans-serif; }
+
+    /* HOME */
+    #section-home.active { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; min-height: calc(100vh - 2px); padding: 2rem 1rem; }
+    .home-greeting { font-size: 2rem; font-weight: 700; color: #4D2115; margin-bottom: 0.3rem; font-family: 'Heebo', sans-serif; }
+    .home-date { font-size: 0.88rem; color: #7A8570; margin-bottom: 1.5rem; font-family: 'Heebo', sans-serif; }
+    #section-home .stats { margin-bottom: 2rem; }
+    .home-nav { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.85rem; width: 100%; max-width: 340px; margin-bottom: 2rem; }
+    .home-card { position: relative; background: white; border-radius: 14px; padding: 1.1rem 0.75rem; text-align: center; cursor: pointer; border: 2px solid #C2C9A8; transition: border-color 0.2s, background 0.2s; }
+    .home-card:hover { border-color: #78855F; background: #E8EAE0; }
+    .home-card .hc-icon { margin-bottom: 0.4rem; }
+    .home-card .hc-icon svg { width: 26px; height: 26px; stroke: #78855F; }
+    .home-card .hc-label { font-size: 0.82rem; font-weight: 700; color: #4D2115; font-family: 'Heebo', sans-serif; }
+    .home-links { display: flex; flex-direction: column; gap: 0.6rem; width: 100%; max-width: 420px; margin-bottom: 1rem; }
+    .btn-copy-link { padding: 0.65rem 1.2rem; border: none; border-radius: 10px; background: #78855F; color: white; font-size: 0.88rem; font-weight: 700; cursor: pointer; font-family: 'Heebo', sans-serif; display: flex; align-items: center; justify-content: center; gap: 0.4rem; width: 100%; transition: background 0.2s; }
+    .btn-copy-link:hover { background: #606A4C; }
+
+    /* ALERTS */
+    .alerts-list { display: flex; flex-direction: column; gap: 0.75rem; }
+    .alert-bubble { background: white; border-radius: 14px; border: 2px solid #C2C9A8; padding: 1rem 1.2rem; }
+    .alert-bubble.urgent { border-color: #fc8181; }
+    .alert-bubble.warn { border-color: #f6ad55; }
+    .alert-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem; }
+    .alert-icon { font-size: 1.3rem; }
+    .alert-title { font-weight: 700; font-size: 0.9rem; color: #4D2115; font-family: 'Heebo', sans-serif; }
+    .alert-body { font-size: 0.85rem; color: #7A8570; margin-bottom: 0.75rem; line-height: 1.5; font-family: 'Heebo', sans-serif; }
+    .alert-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .btn-alert { padding: 0.35rem 0.8rem; border: none; border-radius: 7px; font-size: 0.8rem; font-weight: 700; cursor: pointer; font-family: 'Heebo', sans-serif; }
+    .btn-alert-copy { background: #e2e8f0; color: #4D2115; }
+    .btn-alert-wa { background: #25d366; color: white; }
+    .alerts-empty { text-align: center; color: #7A8570; padding: 3rem 1rem; font-size: 0.95rem; line-height: 1.8; font-family: 'Heebo', sans-serif; }
+    .alert-filter { padding: 0.35rem 0.9rem; border: 2px solid #C2C9A8; border-radius: 20px; background: white; font-size: 0.82rem; font-weight: 600; color: #7A8570; cursor: pointer; font-family: 'Heebo', sans-serif; }
+    .alert-filter.active { border-color: #78855F; background: #E8EAE0; color: #4D2115; }
+    .search-input { width: 100%; padding: 0.6rem 0.9rem; border: 1px solid #C2C9A8; border-radius: 8px; font-size: 0.9rem; margin-bottom: 1rem; font-family: 'Heebo', sans-serif; background: white; }
+    .search-input:focus { outline: none; border-color: #78855F; }
+    #section-home .stats { grid-template-columns: repeat(2, 1fr); }
+    #section-home .stats .stat:last-child { grid-column: span 2; max-width: 200px; margin: 0 auto; width: 100%; }
+
+    /* CLASS GROUPS */
+    .class-group { background: white; border-radius: 12px; border: 1px solid #C2C9A8; margin-bottom: 0.75rem; overflow: hidden; }
+    .class-group-header { padding: 1rem 1.2rem; display: flex; align-items: center; gap: 0.75rem; cursor: pointer; transition: background 0.2s; }
+    .class-group-header:hover { background: #E8EAE0; }
+    .class-group-title { font-weight: 700; font-size: 0.95rem; color: #4D2115; font-family: 'Heebo', sans-serif; }
+    .class-group-meta { font-size: 0.82rem; color: #7A8570; margin-top: 0.2rem; font-family: 'Heebo', sans-serif; }
+    .class-group-count { font-size: 0.9rem; font-weight: 700; color: #78855F; margin-right: auto; white-space: nowrap; font-family: 'Heebo', sans-serif; }
+    .class-group-count.full { color: #e53e3e; }
+    .class-group-body { border-top: 1px solid #C2C9A8; display: none; }
+    .class-group-body.open { display: block; }
+    .class-group-body th { background: #E8EAE0; }
+
+    /* ACCORDION */
+    .accordion { background: white; border-radius: 12px; border: 1px solid #C2C9A8; margin-bottom: 0.75rem; overflow: hidden; }
+    .accordion-header { padding: 1rem 1.2rem; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: background 0.2s; }
+    .accordion-header:hover { background: #E8EAE0; }
+    .accordion-header-title { font-weight: 700; font-size: 0.95rem; color: #4D2115; display: flex; align-items: center; gap: 0.5rem; font-family: 'Heebo', sans-serif; }
+    .accordion-header-title svg { width: 18px; height: 18px; stroke: #78855F; }
+    .accordion-body { border-top: 1px solid #C2C9A8; display: none; padding: 1.5rem; }
+    .accordion-body.open { display: block; }
+    .accordion-chevron { transition: transform 0.2s; flex-shrink: 0; }
+
+    .nav-settings-btn { margin-right: auto; border-bottom: none !important; color: #7A8570 !important; }
+
+    .link-row { display: flex; align-items: center; gap: 0.6rem; background: #E8EAE0; border: 1px solid #C2C9A8; border-radius: 10px; padding: 0.65rem 1rem; margin-bottom: 1rem; font-size: 0.85rem; color: #4D2115; font-family: 'Heebo', sans-serif; }
+    .link-row svg { width: 15px; height: 15px; flex-shrink: 0; stroke: #78855F; }
+    .link-row span { flex: 1; font-weight: 600; }
+
+    .forms-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+    .forms-grid-2 .card { margin-bottom: 0; }
+
+    .demo-notice { background: #e8f0fe; border: 1px solid #c7d4f0; border-radius: 8px; padding: 0.65rem 1rem; font-size: 0.82rem; color: #4a5568; font-family: 'Heebo', sans-serif; margin-bottom: 1rem; }
+
+    /* MODAL */
+    .modal-backdrop { position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; }
+    .modal-backdrop.hidden { display: none; }
+    .modal { background: white; border-radius: 16px; padding: 1.75rem; width: 90%; max-width: 460px; box-shadow: 0 8px 40px rgba(0,0,0,0.2); }
+    .modal h3 { color: #4D2115; margin-bottom: 1.25rem; font-size: 1.05rem; font-family: 'Heebo', sans-serif; }
+    .modal-actions { display: flex; gap: 0.75rem; margin-top: 1.25rem; }
+
+    /* SUMMARY CHART */
+    .chart-bar-row { margin-bottom: 0.75rem; }
+    .chart-bar-label { display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.25rem; color: #4D2115; font-family: 'Heebo', sans-serif; }
+    .chart-bar-track { background: #E8EAE0; border-radius: 4px; height: 10px; overflow: hidden; }
+    .chart-bar-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+
+    @media (max-width: 720px) {
+      .forms-grid-2 { grid-template-columns: 1fr; }
+      body { flex-direction: column; height: auto; overflow: auto; }
+      .sidebar { display: none; }
+      .app-content { overflow: visible; }
+      main { overflow: visible; }
+      nav { overflow-x: auto; -webkit-overflow-scrolling: touch; position: sticky; top: 0; z-index: 100; }
+      nav button { white-space: nowrap; padding: 0.75rem 1rem; font-size: 0.82rem; }
+      .form-grid { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      table { display: block; overflow-x: auto; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- EDIT MODAL -->
+<div class="modal-backdrop hidden" id="edit-modal">
+  <div class="modal">
+    <h3>עריכת לקוח</h3>
+    <input type="hidden" id="edit-id">
+    <div class="form-grid">
+      <div><label>שם מלא</label><input type="text" id="edit-name"></div>
+      <div><label>טלפון</label><input type="tel" id="edit-phone"></div>
+      <div><label>אימייל</label><input type="email" id="edit-email"></div>
+      <div><label>הערות</label><input type="text" id="edit-notes"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="saveClientDemo()">שמור</button>
+      <button class="btn" style="background:#e2e8f0" onclick="closeEditModal()">ביטול</button>
+    </div>
+  </div>
+</div>
+
+<!-- PIN SCREEN -->
+<div id="pin-screen">
+  <div class="pin-logo">
+    <img src="logo-olive.png" alt="olive">
+    <div class="pin-subtitle">הכניסו קוד כניסה</div>
+    <div class="pin-hint">🔑 קוד הדגמה: 1234</div>
+  </div>
+  <div class="pin-dots">
+    <div class="pin-dot" id="d0"></div>
+    <div class="pin-dot" id="d1"></div>
+    <div class="pin-dot" id="d2"></div>
+    <div class="pin-dot" id="d3"></div>
+  </div>
+  <div class="pin-keypad">
+    <button class="pin-key" onclick="pinPress('1')">1</button>
+    <button class="pin-key" onclick="pinPress('2')">2</button>
+    <button class="pin-key" onclick="pinPress('3')">3</button>
+    <button class="pin-key" onclick="pinPress('4')">4</button>
+    <button class="pin-key" onclick="pinPress('5')">5</button>
+    <button class="pin-key" onclick="pinPress('6')">6</button>
+    <button class="pin-key" onclick="pinPress('7')">7</button>
+    <button class="pin-key" onclick="pinPress('8')">8</button>
+    <button class="pin-key" onclick="pinPress('9')">9</button>
+    <button class="pin-key" onclick="pinClear()">✕</button>
+    <button class="pin-key" onclick="pinPress('0')">0</button>
+    <button class="pin-key" onclick="pinBack()">⌫</button>
+  </div>
+  <div class="pin-error" id="pin-error"></div>
+</div>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-overlay">
+    <div class="sidebar-logo">
+      <img src="logo-olive.png" alt="olive">
+      <h1>olive</h1>
+    </div>
+    <div class="sidebar-bottom">
+      <div class="studio-name">סטודיו נגה</div>
+      <div class="today-date" id="today-date"></div>
+    </div>
+  </div>
+</div>
+
+<!-- APP CONTENT -->
+<div class="app-content">
+  <nav id="main-nav" style="display:none">
+    <button onclick="goHome()"><i data-lucide="home"></i></button>
+    <button onclick="showSection('alerts', this)" id="alerts-tab"><i data-lucide="bell"></i> התראות <span id="alerts-nav-badge" class="nav-badge" style="display:none">2</span></button>
+    <button onclick="showSection('clients', this)"><i data-lucide="users"></i> לקוחות</button>
+    <button onclick="showSection('classes', this)"><i data-lucide="calendar"></i> שיעורים</button>
+    <button class="nav-settings-btn" onclick="showSection('settings', this)" title="הגדרות"><i data-lucide="settings"></i></button>
+  </nav>
+
+  <main>
+    <div id="msg-global"></div>
+
+    <!-- HOME -->
+    <div id="section-home" class="section active">
+      <div class="home-greeting">שלום, נגה 👋</div>
+      <div class="home-date" id="home-date"></div>
+      <div class="stats" style="grid-template-columns:repeat(2,1fr)">
+        <div class="stat"><div class="stat-number">12</div><div class="stat-label">לקוחות</div></div>
+        <div class="stat"><div class="stat-number">8</div><div class="stat-label">מנויים פעילים</div></div>
+        <div class="stat" style="grid-column:span 2;max-width:200px;margin:0 auto;width:100%"><div class="stat-number" style="color:#e53e3e">2</div><div class="stat-label">ממתינים לאישור</div></div>
+      </div>
+      <div class="home-nav">
+        <div class="home-card" onclick="navTo('alerts')" style="position:relative">
+          <span class="hc-badge">2</span>
+          <div class="hc-icon"><i data-lucide="bell"></i></div>
+          <div class="hc-label">התראות</div>
+        </div>
+        <div class="home-card" onclick="navTo('clients')">
+          <div class="hc-icon"><i data-lucide="users"></i></div>
+          <div class="hc-label">לקוחות</div>
+        </div>
+        <div class="home-card" onclick="navTo('classes')" style="grid-column:span 2;max-width:160px;margin:0 auto;width:100%">
+          <div class="hc-icon"><i data-lucide="calendar"></i></div>
+          <div class="hc-label">שיעורים</div>
+        </div>
+      </div>
+      <div class="home-links">
+        <button class="btn-copy-link" onclick="showMsg('✓ קישור הועתק: demo.olive.co.il/register','success')"><i data-lucide="copy"></i> העתק קישור הרשמה למנוי</button>
+        <button class="btn-copy-link" onclick="showMsg('✓ קישור הועתק: demo.olive.co.il/schedule','success')"><i data-lucide="copy"></i> העתק קישור לשיעורים השבוע</button>
+      </div>
+    </div>
+
+    <!-- ALERTS -->
+    <div id="section-alerts" class="section">
+      <div class="card">
+        <h2>התראות ועדכונים</h2>
+        <input type="text" class="search-input" placeholder="חיפוש לפי שם לקוח..." oninput="filterAlerts(null, null, this.value)">
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1rem">
+          <button class="alert-filter active" onclick="filterAlerts('all', this, '')">הכל</button>
+          <button class="alert-filter" onclick="filterAlerts('urgent', this, '')">הרשמות חדשות</button>
+          <button class="alert-filter" onclick="filterAlerts('expiring', this, '')">פקיעת מנוי</button>
+          <button class="alert-filter" onclick="filterAlerts('last', this, '')">שיעור אחרון</button>
+        </div>
+        <div id="alerts-list" class="alerts-list"></div>
+      </div>
+    </div>
+
+    <!-- CLIENTS -->
+    <div id="section-clients" class="section">
+      <div style="display:flex;justify-content:center;margin-bottom:1.5rem">
+        <div class="stat" style="min-width:160px;max-width:220px"><div class="stat-number" id="stat-clients">12</div><div class="stat-label">לקוחות</div></div>
+      </div>
+
+      <div class="accordion">
+        <div class="accordion-header" onclick="toggleAccordion('acc-add-client')">
+          <div class="accordion-header-title"><i data-lucide="user-plus"></i> הוספת לקוח חדש</div>
+          <i data-lucide="chevron-down" class="accordion-chevron" id="chev-acc-add-client" style="width:18px;height:18px;stroke:#7A6860"></i>
+        </div>
+        <div class="accordion-body" id="acc-add-client">
+          <div class="demo-notice">🫒 גרסת הדגמה — פעולות כתיבה מוצגות בלבד ואינן נשמרות</div>
+          <div class="form-grid">
+            <div><label>שם מלא *</label><input type="text" placeholder="שם ומשפחה"></div>
+            <div><label>טלפון *</label><input type="tel" placeholder="05X-XXXXXXX"></div>
+            <div><label>אימייל</label><input type="email" placeholder="mail@example.com"></div>
+            <div><label>הערות</label><input type="text" placeholder="הערות..."></div>
+          </div>
+          <button class="btn btn-primary" style="margin-top:1rem" onclick="showMsg('🫒 גרסת הדגמה — הלקוח לא נשמר','info')">הוסף לקוח</button>
+        </div>
+      </div>
+
+      <div class="accordion">
+        <div class="accordion-header" onclick="toggleAccordion('acc-add-sub')">
+          <div class="accordion-header-title"><i data-lucide="credit-card"></i> שיוך מנוי ללקוח</div>
+          <i data-lucide="chevron-down" class="accordion-chevron" id="chev-acc-add-sub" style="width:18px;height:18px;stroke:#7A6860"></i>
+        </div>
+        <div class="accordion-body" id="acc-add-sub">
+          <div class="demo-notice">🫒 גרסת הדגמה — פעולות כתיבה מוצגות בלבד ואינן נשמרות</div>
+          <div class="form-grid">
+            <div><label>לקוח *</label><select id="sub-client-demo"></select></div>
+            <div><label>סוג מנוי *</label><select id="sub-type-demo" onchange="updateSubInfoDemo()"></select></div>
+            <div><label>תאריך התחלה</label><input type="date" id="sub-start-demo"></div>
+          </div>
+          <p id="sub-info-demo" style="margin-top:0.75rem;color:#718096;font-size:0.9rem"></p>
+          <button class="btn btn-primary" style="margin-top:1rem" onclick="showMsg('🫒 גרסת הדגמה — המנוי לא נשמר','info')">שייך מנוי</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem">
+          <h2 style="margin:0">לקוחות</h2>
+          <div style="display:flex;gap:0.5rem">
+            <button class="alert-filter active" id="tab-active-clients" onclick="switchClientsTab('active', this)">פעילים</button>
+            <button class="alert-filter" id="tab-past-clients" onclick="switchClientsTab('past', this)">לקוחות עבר</button>
+          </div>
+        </div>
+        <input type="text" class="search-input" id="clients-search" placeholder="חיפוש לפי שם או טלפון..." oninput="filterClientsTable()">
+        <div id="clients-active-view">
+          <table>
+            <thead><tr><th>שם</th><th>טלפון</th><th>מנוי</th><th>נותרו</th><th>תוקף</th><th>סטטוס</th><th></th></tr></thead>
+            <tbody id="clients-table"></tbody>
+          </table>
+        </div>
+        <div id="clients-past-view" style="display:none">
+          <table>
+            <thead><tr><th>שם</th><th>טלפון</th><th>מנוי אחרון</th><th>פג תוקף</th><th></th></tr></thead>
+            <tbody id="past-clients-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- CLASSES -->
+    <div id="section-classes" class="section">
+      <div class="link-row"><i data-lucide="link"></i><span>קישור לשיעורים השבוע</span></div>
+      <div class="link-row"><i data-lucide="link"></i><span>קישור להרשמה למנוי</span></div>
+
+      <div class="accordion">
+        <div class="accordion-header" onclick="toggleAccordion('acc-new-class')">
+          <div class="accordion-header-title"><i data-lucide="plus-circle"></i> יצירת שיעור חדש</div>
+          <i data-lucide="chevron-down" class="accordion-chevron" id="chev-acc-new-class" style="width:18px;height:18px;stroke:#7A6860"></i>
+        </div>
+        <div class="accordion-body" id="acc-new-class">
+          <div class="demo-notice">🫒 גרסת הדגמה — שיעורים שנוצרים לא נשמרים</div>
+          <div class="form-grid">
+            <div><label>כותרת *</label><input type="text" placeholder="לדוגמה: יוגה בוקר"></div>
+            <div><label>תאריך *</label><input type="date"></div>
+            <div><label>שעה *</label><input type="time"></div>
+            <div><label>מקסימום משתתפים</label><input type="number" value="10" min="1"></div>
+          </div>
+          <button class="btn btn-primary" style="margin-top:1rem" onclick="showMsg('🫒 גרסת הדגמה — השיעור לא נשמר','info')">צור שיעור</button>
+        </div>
+      </div>
+
+      <table style="display:none"><tbody id="classes-table"></tbody></table>
+
+      <div class="card">
+        <h2>הרשמות לפי שיעורים</h2>
+        <div id="registrations-list"></div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div id="section-settings" class="section">
+      <div class="accordion">
+        <div class="accordion-header" onclick="toggleAccordion('acc-sub-types')">
+          <div class="accordion-header-title"><i data-lucide="credit-card"></i> הגדרות מנוי</div>
+          <i data-lucide="chevron-down" class="accordion-chevron" id="chev-acc-sub-types" style="width:18px;height:18px;stroke:#7A6860"></i>
+        </div>
+        <div class="accordion-body" id="acc-sub-types">
+          <h2 style="margin-bottom:1rem">סוגי מנויים פעילים</h2>
+          <table>
+            <thead><tr><th>שם</th><th>מחיר</th><th>תרגולים</th><th>תוקף</th><th>סטטוס</th></tr></thead>
+            <tbody id="sub-types-table"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="accordion">
+        <div class="accordion-header" onclick="toggleAccordion('acc-summary')">
+          <div class="accordion-header-title"><i data-lucide="bar-chart-2"></i> סיכום חודשי</div>
+          <i data-lucide="chevron-down" class="accordion-chevron" id="chev-acc-summary" style="width:18px;height:18px;stroke:#7A6860"></i>
+        </div>
+        <div class="accordion-body" id="acc-summary">
+          <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;margin-bottom:1.5rem">
+            <label style="font-weight:700;font-size:0.9rem">חודש:</label>
+            <input type="month" id="summary-month" style="width:auto;flex:1;min-width:150px" value="2026-04">
+            <button class="btn btn-primary" onclick="loadDemoSummary()">טען נתונים</button>
+          </div>
+          <div id="summary-content" style="display:none">
+            <div style="font-size:1.05rem;font-weight:700;color:#4D2115;margin-bottom:1rem" id="summary-month-label"></div>
+            <div class="stats" style="margin-bottom:1.5rem">
+              <div class="stat"><div class="stat-number" id="sum-revenue">—</div><div class="stat-label">הכנסות</div></div>
+              <div class="stat"><div class="stat-number" id="sum-subs">—</div><div class="stat-label">מנויים נרכשו</div></div>
+              <div class="stat"><div class="stat-number" id="sum-classes">—</div><div class="stat-label">שיעורים</div></div>
+              <div class="stat"><div class="stat-number" id="sum-clients">—</div><div class="stat-label">לקוחות חדשים</div></div>
+            </div>
+            <table style="margin-bottom:1.5rem">
+              <thead><tr><th>סוג מנוי</th><th>כמות</th><th>מחיר ליחידה</th><th>סה"כ</th></tr></thead>
+              <tbody id="summary-table-body"></tbody>
+            </table>
+            <div id="summary-chart"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  // ── DEMO DATA ─────────────────────────────────────────────
+  const D = {
+    subTypes: [
+      {id:1, name:'מנוי חודשי',   price:280, classes_count:8,  validity_days:30,  is_active:true},
+      {id:2, name:'מנוי רבעוני', price:750, classes_count:24, validity_days:90,  is_active:true},
+      {id:3, name:'כרטיסייה',    price:180, classes_count:5,  validity_days:60,  is_active:true},
+      {id:4, name:'שיעור בודד',  price:70,  classes_count:1,  validity_days:30,  is_active:true},
+    ],
+    clients: [
+      {id:1,  full_name:'מיכל כהן',         phone:'052-1111111', email:'michal@mail.com', notes:'', created_at:'2026-01-15'},
+      {id:2,  full_name:'דנה לוי',           phone:'054-2222222', email:'',                notes:'', created_at:'2026-02-01'},
+      {id:3,  full_name:'שירה גולדברג',      phone:'050-3333333', email:'shira@mail.com',  notes:'', created_at:'2026-02-10'},
+      {id:4,  full_name:'נועה אברהם',        phone:'053-4444444', email:'',                notes:'', created_at:'2026-03-01'},
+      {id:5,  full_name:"יעל ברקוביץ'",     phone:'052-5555555', email:'',                notes:'', created_at:'2026-03-05'},
+      {id:6,  full_name:'אורית שמעוני',      phone:'054-6666666', email:'',                notes:'', created_at:'2026-04-20'},
+      {id:7,  full_name:'רחל פרידמן',        phone:'050-7777777', email:'rachel@mail.com', notes:'', created_at:'2026-01-20'},
+      {id:8,  full_name:'טל מזרחי',          phone:'053-8888888', email:'',                notes:'', created_at:'2026-02-28'},
+      {id:9,  full_name:"ליאת חיימוביץ'",   phone:'052-9999999', email:'',                notes:'', created_at:'2026-03-15'},
+      {id:10, full_name:'ענת רוזנברג',       phone:'054-0000000', email:'',                notes:'', created_at:'2026-04-25'},
+      {id:11, full_name:'כרמלה ביטון',       phone:'050-1122334', email:'',                notes:'', created_at:'2025-10-01'},
+      {id:12, full_name:'יפית שרון',         phone:'053-5566778', email:'',                notes:'', created_at:'2025-11-15'},
+    ],
+    subs: [
+      {id:1,  client_id:1,  type_id:1, remaining:5,  start:'2026-04-28', expiry:'2026-05-28', active:true},
+      {id:2,  client_id:2,  type_id:2, remaining:18, start:'2026-04-01', expiry:'2026-07-01', active:true},
+      {id:3,  client_id:3,  type_id:3, remaining:2,  start:'2026-03-10', expiry:'2026-05-09', active:true},
+      {id:4,  client_id:4,  type_id:1, remaining:7,  start:'2026-04-20', expiry:'2026-05-20', active:true},
+      {id:5,  client_id:5,  type_id:1, remaining:1,  start:'2026-04-15', expiry:'2026-05-15', active:true},
+      {id:6,  client_id:6,  type_id:1, remaining:8,  start:'2026-05-02', expiry:'2026-06-02', active:false},
+      {id:7,  client_id:7,  type_id:2, remaining:12, start:'2026-03-15', expiry:'2026-06-15', active:true},
+      {id:8,  client_id:8,  type_id:1, remaining:4,  start:'2026-04-25', expiry:'2026-05-25', active:true},
+      {id:9,  client_id:9,  type_id:3, remaining:3,  start:'2026-04-01', expiry:'2026-05-30', active:true},
+      {id:10, client_id:10, type_id:3, remaining:5,  start:'2026-05-03', expiry:'2026-07-03', active:false},
+      {id:11, client_id:11, type_id:1, remaining:0,  start:'2025-10-01', expiry:'2025-10-31', active:false},
+      {id:12, client_id:12, type_id:1, remaining:0,  start:'2025-11-15', expiry:'2025-12-15', active:false},
+    ],
+    classes: [
+      {id:1, title:'יוגה בוקר',             date:'2026-04-28', time:'09:00', capacity:10, completed:true},
+      {id:2, title:'פילאטיס בסיסי',          date:'2026-04-29', time:'18:00', capacity:8,  completed:true},
+      {id:3, title:'יוגה בוקר',             date:'2026-05-05', time:'09:00', capacity:10, completed:false},
+      {id:4, title:'פילאטיס בסיסי',          date:'2026-05-06', time:'18:00', capacity:8,  completed:false},
+      {id:5, title:'יוגה מתקדמים',           date:'2026-05-07', time:'07:30', capacity:8,  completed:false},
+      {id:6, title:'מתיחות וגמישות',         date:'2026-05-08', time:'08:00', capacity:12, completed:false},
+      {id:7, title:'יוגה נינוחה',            date:'2026-05-11', time:'19:00', capacity:10, completed:false},
+      {id:8, title:'פילאטיס אמצע שבוע',      date:'2026-05-13', time:'18:00', capacity:8,  completed:false},
+    ],
+    regs: [
+      {id:1,  class_id:1, client_id:1}, {id:2,  class_id:1, client_id:2}, {id:3,  class_id:1, client_id:4},
+      {id:4,  class_id:2, client_id:3}, {id:5,  class_id:2, client_id:5},
+      {id:6,  class_id:3, client_id:1}, {id:7,  class_id:3, client_id:2}, {id:8,  class_id:3, client_id:4},
+      {id:9,  class_id:3, client_id:7}, {id:10, class_id:3, client_id:8}, {id:11, class_id:3, client_id:9},
+      {id:12, class_id:4, client_id:1}, {id:13, class_id:4, client_id:3}, {id:14, class_id:4, client_id:7},
+      {id:15, class_id:4, client_id:8}, {id:16, class_id:4, client_id:5},
+      {id:17, class_id:5, client_id:2}, {id:18, class_id:5, client_id:4}, {id:19, class_id:5, client_id:9},
+      {id:20, class_id:6, client_id:1}, {id:21, class_id:6, client_id:7}, {id:22, class_id:6, client_id:8}, {id:23, class_id:6, client_id:3},
+      {id:24, class_id:7, client_id:4}, {id:25, class_id:7, client_id:2},
+    ]
+  };
+
+  // ── HELPERS ───────────────────────────────────────────────
+  const _days = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+  function fmtDate(d) { return d ? new Date(d + 'T00:00:00').toLocaleDateString('he-IL') : ''; }
+  function fmtDateWithDay(d) {
+    if (!d) return '';
+    const dt = new Date(d + 'T00:00:00');
+    return `יום ${_days[dt.getDay()]}, ${dt.toLocaleDateString('he-IL')}`;
+  }
+  function clientById(id) { return D.clients.find(c => c.id === id); }
+  function subTypeById(id) { return D.subTypes.find(t => t.id === id); }
+  function activeSubForClient(cid) {
+    const today = '2026-05-03';
+    return D.subs.find(s => s.client_id === cid && s.active && s.expiry >= today && s.remaining > 0);
+  }
+  function pendingSubForClient(cid) {
+    return D.subs.find(s => s.client_id === cid && !s.active);
+  }
+  function statusBadge(expiry, remaining, isActive) {
+    if (!isActive) return '<span class="badge badge-orange">ממתין לאישור</span>';
+    const diff = Math.ceil((new Date(expiry) - new Date('2026-05-03')) / 86400000);
+    if (remaining <= 0) return '<span class="badge badge-red">נוצל</span>';
+    if (diff <= 0) return '<span class="badge badge-red">פג תוקף</span>';
+    if (diff <= 7) return '<span class="badge badge-orange">פג בקרוב</span>';
+    return '<span class="badge badge-green">פעיל</span>';
+  }
+
+  // ── INIT ──────────────────────────────────────────────────
+  document.getElementById('today-date').textContent = new Date('2026-05-03').toLocaleDateString('he-IL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  document.getElementById('home-date').textContent = new Date('2026-05-03').toLocaleDateString('he-IL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+  // Populate dropdowns
+  document.getElementById('sub-client-demo').innerHTML = D.clients.map(c => `<option value="${c.id}">${c.full_name} — ${c.phone}</option>`).join('');
+  document.getElementById('sub-type-demo').innerHTML = D.subTypes.map(t => `<option value="${t.id}" data-classes="${t.classes_count}" data-days="${t.validity_days}">${t.name} — ₪${t.price}</option>`).join('');
+  document.getElementById('sub-start-demo').value = '2026-05-03';
+  updateSubInfoDemo();
+
+  function updateSubInfoDemo() {
+    const opt = document.getElementById('sub-type-demo').selectedOptions[0];
+    if (!opt) return;
+    document.getElementById('sub-info-demo').textContent = `${opt.dataset.classes} תרגולים | תוקף: ${opt.dataset.days} ימים`;
+  }
+
+  // ── PIN ────────────────────────────────────────────────────
+  let pinInput = '';
+  const PIN = '1234';
+
+  function pinPress(digit) {
+    if (pinInput.length >= 4) return;
+    pinInput += digit;
+    updateDots();
+    if (pinInput.length === 4) {
+      if (pinInput === PIN) {
+        document.getElementById('pin-screen').classList.add('hidden');
+        document.getElementById('main-nav').style.display = 'flex';
+        lucide.createIcons();
+      } else {
+        document.getElementById('pin-error').textContent = 'קוד שגוי — נסו שוב';
+        pinInput = '';
+        updateDots();
+        setTimeout(() => document.getElementById('pin-error').textContent = '', 1500);
+      }
+    }
+  }
+  function pinBack() { pinInput = pinInput.slice(0, -1); updateDots(); }
+  function pinClear() { pinInput = ''; updateDots(); }
+  function updateDots() {
+    for (let i = 0; i < 4; i++)
+      document.getElementById('d' + i).classList.toggle('filled', i < pinInput.length);
+  }
+
+  // ── NAVIGATION ────────────────────────────────────────────
+  function showSection(name, btn) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+    document.getElementById('section-' + name).classList.add('active');
+    btn.classList.add('active');
+    document.getElementById('main-nav').style.display = 'flex';
+    if (name === 'alerts') loadAlerts();
+    if (name === 'clients') loadClients();
+    if (name === 'classes') loadRegistrations();
+    if (name === 'settings') loadSettings();
+    lucide.createIcons();
+  }
+
+  function goHome() {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+    document.getElementById('section-home').classList.add('active');
+    document.getElementById('main-nav').style.display = 'none';
+    lucide.createIcons();
+  }
+
+  function navTo(name) {
+    const btn = [...document.querySelectorAll('nav button')].find(b => b.getAttribute('onclick')?.includes(`'${name}'`));
+    if (btn) showSection(name, btn);
+  }
+
+  function showMsg(text, type = 'success') {
+    const el = document.getElementById('msg-global');
+    el.innerHTML = `<div class="msg msg-${type}">${text}</div>`;
+    setTimeout(() => el.innerHTML = '', 3500);
+  }
+
+  // ── ALERTS ────────────────────────────────────────────────
+  let allAlerts = [];
+  let currentAlertFilter = 'all';
+
+  function loadAlerts() {
+    const today = '2026-05-03';
+    const in7   = '2026-05-10';
+    allAlerts = [];
+
+    D.subs.filter(s => !s.active).forEach(s => {
+      const c = clientById(s.client_id);
+      const t = subTypeById(s.type_id);
+      allAlerts.push({ type:'urgent', icon:'user-plus', category:'urgent',
+        title: 'הרשמה חדשה — ממתינה לאישור תשלום',
+        body: `${c?.full_name} נרשמ/ה למנוי "${t?.name}"`, phone: c?.phone, subId: s.id });
+    });
+
+    D.subs.filter(s => s.active && s.expiry >= today && s.expiry <= in7).forEach(s => {
+      const c = clientById(s.client_id);
+      const t = subTypeById(s.type_id);
+      allAlerts.push({ type:'warn', icon:'clock', category:'expiring',
+        title: 'מנוי קרוב לפקיעה',
+        body: `${c?.full_name} — "${t?.name}" · פג ב-${fmtDate(s.expiry)} · נותרו ${s.remaining} תרגולים`, phone: c?.phone });
+    });
+
+    D.subs.filter(s => s.active && s.remaining === 1 && s.expiry >= today).forEach(s => {
+      const c = clientById(s.client_id);
+      const t = subTypeById(s.type_id);
+      allAlerts.push({ type:'warn', icon:'alert-triangle', category:'last',
+        title: 'נותר שיעור אחד בלבד',
+        body: `${c?.full_name} — "${t?.name}" · תוקף עד ${fmtDate(s.expiry)}`, phone: c?.phone });
+    });
+
+    renderAlerts(allAlerts);
+  }
+
+  function filterAlerts(type, btn, q) {
+    if (btn) {
+      document.querySelectorAll('.alert-filter').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentAlertFilter = type || 'all';
+    }
+    const query = (q !== undefined ? q : document.querySelector('#section-alerts .search-input')?.value || '').toLowerCase();
+    let filtered = currentAlertFilter === 'all' ? allAlerts : allAlerts.filter(a => a.category === currentAlertFilter);
+    if (query) filtered = filtered.filter(a => (a.body + a.title).toLowerCase().includes(query));
+    renderAlerts(filtered);
+  }
+
+  function renderAlerts(alerts) {
+    if (!alerts.length) {
+      document.getElementById('alerts-list').innerHTML = '<div class="alerts-empty">אין התראות בקטגוריה זו ✓</div>';
+      return;
+    }
+    document.getElementById('alerts-list').innerHTML = alerts.map(a => `
+      <div class="alert-bubble ${a.type}">
+        <div class="alert-header">
+          <span class="alert-icon"><i data-lucide="${a.icon}" style="width:18px;height:18px;vertical-align:middle"></i></span>
+          <span class="alert-title">${a.title}</span>
+          ${a.subId ? `<button class="btn-alert" style="background:#78855F;color:white;margin-right:auto" onclick="activateSub(${a.subId}, this)">הפעל מנוי ✓</button>` : ''}
+        </div>
+        <div class="alert-body">${a.body}</div>
+        <div class="alert-actions">
+          <button class="btn-alert btn-alert-copy" onclick="this.textContent='✓ הועתק';setTimeout(()=>this.textContent='${a.phone}',2000)">${a.phone}</button>
+          <a class="btn-alert btn-alert-wa" href="#" onclick="return false">WhatsApp</a>
+        </div>
+      </div>`).join('');
+    lucide.createIcons();
+  }
+
+  function activateSub(subId, btn) {
+    const s = D.subs.find(s => s.id === subId);
+    if (s) s.active = true;
+    showMsg('✓ מנוי הופעל בהצלחה');
+    loadAlerts();
+    document.getElementById('alerts-nav-badge').style.display = 'none';
+  }
+
+  // ── CLIENTS ───────────────────────────────────────────────
+  let clientsView = 'active';
+
+  function loadClients() {
+    const today = '2026-05-03';
+    const cutoff = '2026-03-03';
+    const activeRows = [], pastRows = [];
+
+    D.clients.forEach(c => {
+      const activeSub = activeSubForClient(c.id);
+      const pendingSub = pendingSubForClient(c.id);
+      const allClientSubs = D.subs.filter(s => s.client_id === c.id);
+      const lastSub = allClientSubs[allClientSubs.length - 1];
+      const isPast = !activeSub && !pendingSub && (!lastSub || lastSub.expiry < cutoff);
+
+      if (isPast) {
+        const t = lastSub ? subTypeById(lastSub.type_id) : null;
+        pastRows.push(`<tr>
+          <td><strong>${c.full_name}</strong></td>
+          <td><a href="tel:${c.phone}">${c.phone}</a></td>
+          <td>${t ? t.name : '—'}</td>
+          <td>${lastSub ? fmtDate(lastSub.expiry) : '—'}</td>
+          <td><button class="btn btn-sm" style="background:#e2e8f0" onclick="openEditModal(${c.id})">עריכה</button></td>
+        </tr>`);
+      } else {
+        const t = activeSub ? subTypeById(activeSub.type_id) : (pendingSub ? subTypeById(pendingSub.type_id) : null);
+        activeRows.push(`<tr>
+          <td><strong>${c.full_name}</strong></td>
+          <td><a href="tel:${c.phone}">${c.phone}</a></td>
+          <td>${activeSub ? t?.name : (pendingSub ? '<span class="badge badge-orange">ממתין לאישור</span>' : '<span class="badge badge-red">אין מנוי</span>')}</td>
+          <td style="text-align:center;font-weight:700">${activeSub ? activeSub.remaining : '—'}</td>
+          <td>${activeSub ? fmtDate(activeSub.expiry) : '—'}</td>
+          <td>${activeSub ? statusBadge(activeSub.expiry, activeSub.remaining, true) : (pendingSub ? statusBadge('',0,false) : '')}</td>
+          <td style="white-space:nowrap">
+            ${activeSub ? `<button class="btn btn-sm" style="background:#e2e8f0;margin-left:0.2rem" onclick="adjustClasses(${activeSub.id},1)">+1</button><button class="btn btn-sm" style="background:#e2e8f0;margin-left:0.2rem" onclick="adjustClasses(${activeSub.id},-1)">-1</button>` : ''}
+            ${pendingSub ? `<button class="btn btn-sm" style="background:#78855F;color:white;margin-left:0.2rem" onclick="activateSub(${pendingSub.id}, this)">הפעל</button>` : ''}
+            <button class="btn btn-sm" style="background:#e2e8f0;margin-left:0.2rem" onclick="openEditModal(${c.id})">עריכה</button>
+          </td>
+        </tr>`);
+      }
+    });
+
+    document.getElementById('clients-table').innerHTML = activeRows.join('') || '<tr><td colspan="7" class="empty">אין לקוחות פעילים</td></tr>';
+    document.getElementById('past-clients-table').innerHTML = pastRows.join('') || '<tr><td colspan="5" class="empty">אין לקוחות עבר</td></tr>';
+  }
+
+  function adjustClasses(subId, delta) {
+    const s = D.subs.find(s => s.id === subId);
+    if (!s) return;
+    const newVal = s.remaining + delta;
+    if (newVal < 0) return showMsg('לא ניתן לרדת מתחת לאפס', 'error');
+    s.remaining = newVal;
+    showMsg(`✓ עודכן ל-${newVal} תרגולים`);
+    loadClients();
+  }
+
+  function switchClientsTab(tab, btn) {
+    clientsView = tab;
+    document.querySelectorAll('#tab-active-clients, #tab-past-clients').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('clients-active-view').style.display = tab === 'active' ? '' : 'none';
+    document.getElementById('clients-past-view').style.display = tab === 'past' ? '' : 'none';
+  }
+
+  function filterClientsTable() {
+    const q = (document.getElementById('clients-search')?.value || '').toLowerCase();
+    const tableId = clientsView === 'active' ? 'clients-table' : 'past-clients-table';
+    document.querySelectorAll('#' + tableId + ' tr').forEach(tr => {
+      tr.style.display = !q || tr.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+  }
+
+  function openEditModal(clientId) {
+    const c = clientById(clientId);
+    if (!c) return;
+    document.getElementById('edit-id').value = clientId;
+    document.getElementById('edit-name').value = c.full_name;
+    document.getElementById('edit-phone').value = c.phone;
+    document.getElementById('edit-email').value = c.email || '';
+    document.getElementById('edit-notes').value = c.notes || '';
+    document.getElementById('edit-modal').classList.remove('hidden');
+  }
+
+  function closeEditModal() { document.getElementById('edit-modal').classList.add('hidden'); }
+
+  function saveClientDemo() {
+    const id = +document.getElementById('edit-id').value;
+    const c = clientById(id);
+    if (c) {
+      c.full_name = document.getElementById('edit-name').value.trim() || c.full_name;
+      c.phone = document.getElementById('edit-phone').value.trim() || c.phone;
+      c.email = document.getElementById('edit-email').value.trim();
+      c.notes = document.getElementById('edit-notes').value.trim();
+    }
+    closeEditModal();
+    showMsg('✓ פרטי הלקוח עודכנו');
+    loadClients();
+  }
+
+  // ── CLASSES ───────────────────────────────────────────────
+  function loadRegistrations() {
+    const counts = {};
+    D.regs.forEach(r => { counts[r.class_id] = (counts[r.class_id] || 0) + 1; });
+
+    const active = D.classes.filter(c => !c.completed);
+    const completed = D.classes.filter(c => c.completed);
+
+    const renderGroup = c => {
+      const count = counts[c.id] || 0;
+      const isFull = count >= c.capacity;
+      return `<div class="class-group">
+        <div class="class-group-header" onclick="toggleClassRegs(${c.id}, this)">
+          <div style="flex:1">
+            <div class="class-group-title">${c.title}${c.completed ? ' <span class="badge badge-green" style="font-size:0.7rem">הסתיים ✓</span>' : ''}</div>
+            <div class="class-group-meta">${fmtDateWithDay(c.date)} · ${c.time}</div>
+            ${!c.completed ? `<div style="margin-top:0.5rem" onclick="event.stopPropagation()"><button class="btn btn-sm" style="background:#78855F;color:white" onclick="endClassDemo(${c.id})">סיים שיעור</button></div>` : ''}
+          </div>
+          <div class="class-group-count${isFull ? ' full' : ''}">${count} / ${c.capacity} רשומים</div>
+          <i data-lucide="chevron-down" id="chev-${c.id}" style="width:18px;height:18px;stroke:#7A6860;transition:transform 0.2s;flex-shrink:0"></i>
+        </div>
+        <div class="class-group-body" id="cgb-${c.id}"></div>
+      </div>`;
+    };
+
+    const completedHTML = completed.length
+      ? `<div onclick="toggleCompletedRegs()" style="cursor:pointer;background:#E8EAE0;border-radius:10px;padding:0.65rem 1rem;margin-bottom:0.5rem;border:1px solid #C2C9A8;margin-top:0.5rem">
+          <span id="completed-regs-label" style="font-size:0.85rem;color:#78855F;font-weight:600;user-select:none">▸ הרשמות לשיעורים שהסתיימו (${completed.length})</span>
+        </div>
+        <div id="completed-regs-rows" style="display:none">${completed.map(renderGroup).join('')}</div>`
+      : '';
+
+    document.getElementById('registrations-list').innerHTML = active.map(renderGroup).join('') + completedHTML;
+    lucide.createIcons();
+  }
+
+  function toggleClassRegs(classId, el) {
+    const body = document.getElementById('cgb-' + classId);
+    const chev = document.getElementById('chev-' + classId);
+    const isOpen = body.classList.contains('open');
+    if (isOpen) { body.classList.remove('open'); if (chev) chev.style.transform = ''; return; }
+    body.classList.add('open');
+    if (chev) chev.style.transform = 'rotate(180deg)';
+    const regs = D.regs.filter(r => r.class_id === classId);
+    if (!regs.length) { body.innerHTML = '<div class="empty" style="padding:1rem">אין רשומים לשיעור זה</div>'; return; }
+    body.innerHTML = `<table>
+      <thead><tr><th>לקוח</th><th>טלפון</th><th>מנוי</th><th></th></tr></thead>
+      <tbody>${regs.map(r => {
+        const c = clientById(r.client_id);
+        const s = D.subs.find(s => s.client_id === r.client_id);
+        const t = s ? subTypeById(s.type_id) : null;
+        return `<tr>
+          <td><strong>${c?.full_name || '—'}</strong></td>
+          <td><a href="tel:${c?.phone}">${c?.phone || '—'}</a></td>
+          <td>${t?.name || '—'}</td>
+          <td><button class="btn btn-danger btn-sm" onclick="removeRegDemo(${r.id}, ${classId})">הסר</button></td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table>`;
+  }
+
+  function removeRegDemo(regId, classId) {
+    const idx = D.regs.findIndex(r => r.id === regId);
+    if (idx !== -1) D.regs.splice(idx, 1);
+    showMsg('✓ הרשמה הוסרה');
+    loadRegistrations();
+  }
+
+  function endClassDemo(classId) {
+    if (!confirm('לסמן שיעור זה כהסתיים?')) return;
+    const c = D.classes.find(c => c.id === classId);
+    if (c) c.completed = true;
+    const regs = D.regs.filter(r => r.class_id === classId);
+    regs.forEach(r => {
+      const s = D.subs.find(s => s.client_id === r.client_id && s.active && s.remaining > 0);
+      if (s) s.remaining--;
+    });
+    showMsg(`✓ שיעור הסתיים — נוכה תרגול מ-${regs.length} משתתפים`);
+    loadRegistrations();
+  }
+
+  function toggleCompletedRegs() {
+    const container = document.getElementById('completed-regs-rows');
+    const label = document.getElementById('completed-regs-label');
+    const isHidden = container.style.display === 'none';
+    container.style.display = isHidden ? '' : 'none';
+    const count = container.querySelectorAll('.class-group').length;
+    if (label) label.textContent = (isHidden ? '▾ ' : '▸ ') + `הרשמות לשיעורים שהסתיימו (${count})`;
+  }
+
+  // ── SETTINGS ──────────────────────────────────────────────
+  function loadSettings() {
+    document.getElementById('sub-types-table').innerHTML = D.subTypes.map(t => `<tr>
+      <td><strong>${t.name}</strong></td>
+      <td>₪${t.price}</td>
+      <td>${t.classes_count}</td>
+      <td>${t.validity_days} ימים</td>
+      <td><span class="badge ${t.is_active ? 'badge-green' : 'badge-red'}">${t.is_active ? 'פעיל' : 'לא פעיל'}</span></td>
+    </tr>`).join('');
+  }
+
+  const _heMonths = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+
+  function loadDemoSummary() {
+    const monthVal = document.getElementById('summary-month').value;
+    if (!monthVal) return;
+    const [year, month] = monthVal.split('-').map(Number);
+    const firstDay = `${year}-${String(month).padStart(2,'0')}-01`;
+    const lastDay = new Date(year, month, 0).toISOString().split('T')[0];
+    const monthSubs = D.subs.filter(s => s.start >= firstDay && s.start <= lastDay);
+    const revenue = monthSubs.reduce((sum, s) => sum + (subTypeById(s.type_id)?.price || 0), 0);
+    const newClients = D.clients.filter(c => c.created_at >= firstDay && c.created_at <= lastDay).length;
+    const completedClasses = D.classes.filter(c => c.date >= firstDay && c.date <= lastDay && c.completed).length;
+    const totalClasses = D.classes.filter(c => c.date >= firstDay && c.date <= lastDay).length;
+
+    const byType = {};
+    monthSubs.forEach(s => {
+      const t = subTypeById(s.type_id);
+      if (!t) return;
+      if (!byType[t.name]) byType[t.name] = { count: 0, total: 0, price: t.price };
+      byType[t.name].count++;
+      byType[t.name].total += t.price;
+    });
+
+    document.getElementById('summary-month-label').textContent = _heMonths[month - 1] + ' ' + year;
+    document.getElementById('sum-revenue').textContent = '₪' + revenue.toLocaleString('he-IL');
+    document.getElementById('sum-subs').textContent = monthSubs.length;
+    document.getElementById('sum-classes').textContent = completedClasses + ' / ' + totalClasses;
+    document.getElementById('sum-clients').textContent = newClients;
+
+    const colors = ['#78855F','#5a8a6a','#8ab5a0','#C2C9A8'];
+    document.getElementById('summary-table-body').innerHTML = Object.entries(byType).map(([name, d]) => `<tr>
+      <td>${name}</td><td>${d.count}</td>
+      <td style="color:#78855F;font-weight:700">₪${d.price.toLocaleString('he-IL')}</td>
+      <td style="color:#78855F;font-weight:700">₪${d.total.toLocaleString('he-IL')}</td>
+    </tr>`).join('') + `<tr style="background:#E8EAE0;font-weight:700;border-top:2px solid #C2C9A8">
+      <td colspan="3" style="color:#78855F">סה"כ הכנסות</td>
+      <td style="color:#78855F;font-weight:700">₪${revenue.toLocaleString('he-IL')}</td>
+    </tr>`;
+
+    document.getElementById('summary-chart').innerHTML = Object.entries(byType)
+      .sort((a, b) => b[1].total - a[1].total)
+      .map(([name, d], i) => {
+        const pct = revenue > 0 ? (d.total / revenue * 100).toFixed(1) : 0;
+        return `<div class="chart-bar-row">
+          <div class="chart-bar-label"><span>${name}</span><span style="font-weight:700;color:#78855F">₪${d.total.toLocaleString('he-IL')} (${pct}%)</span></div>
+          <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${pct}%;background:${colors[i % colors.length]}"></div></div>
+        </div>`;
+      }).join('');
+
+    document.getElementById('summary-content').style.display = 'block';
+    lucide.createIcons();
+  }
+
+  // ── ACCORDION ─────────────────────────────────────────────
+  function toggleAccordion(id) {
+    const body = document.getElementById(id);
+    const isOpen = body.classList.contains('open');
+    document.querySelectorAll('.accordion-body').forEach(b => b.classList.remove('open'));
+    document.querySelectorAll('.accordion-chevron').forEach(c => c.style.transform = '');
+    if (!isOpen) {
+      body.classList.add('open');
+      const chev = document.getElementById('chev-' + id);
+      if (chev) chev.style.transform = 'rotate(180deg)';
+    }
+    lucide.createIcons();
+  }
+
+  lucide.createIcons();
+</script>
+</body>
+</html>
